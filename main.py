@@ -72,8 +72,11 @@ def _shannon_fano_algorithm(ensemble) -> dict:
 
 
 def shannon_fano_coding(ensemble: dict) -> dict:
+    print("Неотсортированный: \n", ensemble)
+
     sorted_ensemble: dict = descending_sort(ensemble)
-    print(sorted_ensemble)
+    print("Отсортированный: \n", sorted_ensemble)
+    print()
 
     result: dict = _shannon_fano_algorithm(sorted_ensemble)
     print(result)
@@ -120,8 +123,6 @@ def main():
             word.replace(' ', '')
         key, value = line
         ensemble[key] = float(value)
-
-    print(ensemble)
 
     # Сумма вероятностей должна быть равна 1.0
     if test_valid(ensemble):

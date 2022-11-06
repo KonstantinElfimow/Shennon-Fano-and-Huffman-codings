@@ -1,81 +1,78 @@
 import numpy as np
 
-# Коэф для более точного рассчёта float
-k: int = 100000
 
-
-def descending_sort(ensemble: dict) -> dict:
+def sort_dict(ensemble: dict, reverse: bool) -> dict:
     """ Сортировка ансамбля по убыванию """
     result: dict = dict()
 
-    sorted_keys = sorted(ensemble, key=ensemble.get, reverse=True)
+    sorted_keys = sorted(ensemble, key=ensemble.get, reverse=reverse)
     for w in sorted_keys:
         result[w] = ensemble[w]
     return result
 
 
-def average_length(l_length: list, l_p: list) -> float:
-    L: float = 0.0
+def average_length(l_length: list, l_p: list) -> np.float64:
+    L: np.float64 = np.float64(0.0)
     for i in range(len(l_p)):
-        L += len(l_length[i]) * k * l_p[i]
-    L /= k
-    return float(format(L, '.8g'))
+        L += len(l_length[i]) * l_p[i]
+    return np.float64(format(L, '.8g'))
 
 
-def entropy(l_p: list) -> float:
-    H: float = 0.0
+def entropy(l_p: list) -> np.float64:
+    H: np.float64 = np.float64(0.0)
     for value in l_p:
-        H += k * value * np.log2(value)
-    H = -H / k
-    return float(format(H, '.8g'))
+        value = np.float64(value)
+        H += value * np.log2(value)
+    H = np.float64(-H)
+    return np.float64(format(H, '.8g'))
 
 
-def redundancy(L: float, H: float) -> float:
-    K: float = L - H
-    return float(format(K, '.8g'))
+def redundancy(L: np.float64, H: np.float64) -> np.float64:
+    K: np.float64 = np.float64(L - H)
+    return np.float64(format(K, '.8g'))
 
 
-_prefix_ensemble: dict = dict()
+_prefix_ensemble_shannon_fano: dict = dict()
 
 
-def _division(ensemble: dict, start: int, stop: int, p: float = 1.0, level: int = 0, bi: str = "") -> None:
-    global _prefix_ensemble
-    print("От какого до какого элемента: ", start + 1, stop, " Левая(0)/правая(1) ветка: ", bi, " Глубина: ", level)
+def _division(ensemble: dict, start: int, stop: int, p: np.float64 = 1.0, level: int = 0, bi: str = '') -> None:
+    global _prefix_ensemble_shannon_fano
+    print('От какого до какого элемента: ', start + 1, stop, ' Левая(0)/правая(1) ветка: ', bi, ' Глубина: ', level)
 
     keys: list = [key for key in ensemble.keys()]
-    print(keys[start:stop], "Вероятность: ", format(p, '.5g'))
+    print(keys[start:stop], 'Вероятность: ', format(p, '.5g'))
 
     for i in range(start, stop):
-        _prefix_ensemble[keys[i]] = _prefix_ensemble.get(keys[i], "") + bi
+        _prefix_ensemble_shannon_fano[keys[i]] = _prefix_ensemble_shannon_fano.get(keys[i], '') + bi
 
     if stop - start <= 1:
-        print(_prefix_ensemble[keys[start]], "\n")
+        print(_prefix_ensemble_shannon_fano[keys[start]], '\n')
         return
 
     print()
 
-    summary: float = 0.0
+    summary: np.float64 = np.float64(0.0)
     for i in range(start, stop, 1):
         value = ensemble.get(keys[i])
 
-        if abs(p / 2 * k - summary * k) - abs(p / 2 * k - (summary * k + value * k)) > 0:
+        if abs(p / 2 - summary) - abs(p / 2 - (summary + value)) > 0:
             summary += value
         else:
-            _division(ensemble, start, i, summary, level + 1, "0")
-            _division(ensemble, i, stop, (k * p - k * summary) / k, level + 1, "1")
+            _division(ensemble, start, i, summary, level + 1, '0')
+            _division(ensemble, i, stop, np.float64(p - summary), level + 1, '1')
             break
 
 
 def _shannon_fano_algorithm(ensemble) -> dict:
     _division(ensemble, 0, len(ensemble))
-    return _prefix_ensemble
+    return _prefix_ensemble_shannon_fano
 
 
 def shannon_fano_coding(ensemble: dict) -> dict:
-    print("Неотсортированный: \n", ensemble)
+    print('Неотсортированный: \n', ensemble)
 
-    sorted_ensemble: dict = descending_sort(ensemble)
-    print("Отсортированный: \n", sorted_ensemble)
+    sorted_ensemble: dict = sort_dict(ensemble, True)
+    print('Отсортированный: \n', sorted_ensemble)
     print()
 
     result: dict = _shannon_fano_algorithm(sorted_ensemble)
@@ -83,25 +80,46 @@ def shannon_fano_coding(ensemble: dict) -> dict:
 
     l_prefix: list = [value for value in result.values()]
     p_l: list = [p for p in sorted_ensemble.values()]
-    L: float = average_length(l_prefix, p_l)
-    print("L = ", L, " (бит)")
-    H: float = entropy(p_l)
-    print("H = ", H, " (бит)")
-    K: float = redundancy(L, H)
-    print("K = L - H = ", K, " (бит/символ)")
+    L: np.float64 = average_length(l_prefix, p_l)
+    print('L = ', L, ' (бит)')
+    H: np.float64 = entropy(p_l)
+    print('H = ', H, ' (бит)')
+    K: np.float64 = redundancy(L, H)
+    print('K = L - H = ', K, ' (бит/символ)')
 
     return result
 
 
+_prefix_ensemble_huffman: dict = dict()
+
+
 def huffman_coding(ensemble: dict) -> dict:
-    pass
+    print('Неотсортированный: \n', ensemble)
+
+    sorted_ensemble: dict = sort_dict(ensemble, False)
+    print('Отсортированный: \n', sorted_ensemble)
+    print()
+
+    result: dict = _shannon_fano_algorithm(sorted_ensemble)
+    print(result)
+
+    l_prefix: list = [value for value in result.values()]
+    p_l: list = [p for p in sorted_ensemble.values()]
+    L: np.float64 = average_length(l_prefix, p_l)
+    print('L = ', L, ' (бит)')
+    H: np.float64 = entropy(p_l)
+    print('H = ', H, ' (бит)')
+    K: np.float64 = redundancy(L, H)
+    print('K = L - H = ', K, ' (бит/символ)')
+
+    return result
 
 
 def test_valid(ensemble: dict) -> bool:
-    summary: float = 0
+    summary: np.float64 = np.float64(0.0)
     for value in ensemble.values():
-        summary += value * k
-    return k - summary < 1e-14
+        summary += np.float64(value)
+    return abs(1.0 - summary) < 1e-10
 
 
 def main():
@@ -122,7 +140,7 @@ def main():
         for word in line:
             word.replace(' ', '')
         key, value = line
-        ensemble[key] = float(value)
+        ensemble[key] = np.float64(value)
 
     # Сумма вероятностей должна быть равна 1.0
     if test_valid(ensemble):
@@ -138,7 +156,7 @@ def main():
             file_output.write(f'{key}: {value}\n')
         file_output.close()
     else:
-        print("Неверный вход!")
+        print('Неверный вход!')
 
 
 if __name__ == '__main__':

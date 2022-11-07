@@ -150,13 +150,13 @@ class Node:
 
     side = property(fget=get_side, fset=set_side)
 
-    # def set_visited(self, value):
-    #     self.__visited = value
-    #
-    # def get_visited(self):
-    #     return self.__visited
-    #
-    # visited = property(fget=get_visited, fset=set_visited)
+    def set_visited(self, value):
+        self.__visited = value
+
+    def get_visited(self):
+        return self.__visited
+
+    visited = property(fget=get_visited, fset=set_visited)
 
     def __str__(self):
         return '{}: {}'.format(self.key, self.value)
@@ -174,13 +174,13 @@ class ListenableGraphNode(Node):
 
     side = property(fget=get_side, fset=set_side)
 
-    # def set_visited(self, value):
-    #     super().set_visited(value)
-    #
-    # def get_visited(self):
-    #     return super().get_visited()
-    #
-    # visited = property(fget=get_visited, fset=set_visited)
+    def set_visited(self, value):
+        super().set_visited(value)
+
+    def get_visited(self):
+        return super().get_visited()
+
+    visited = property(fget=get_visited, fset=set_visited)
 
     def __str__(self):
         return super().__str__()
@@ -261,8 +261,8 @@ def huffman_algorythm(sorted_ensemble: dict):
         else:
             count += 1
 
-    # def enter_node(node, level):
-    #     print(f'{str(node)}, Высота: {level}, {str(node.get_side())}')
+    def enter_node(node, level):
+        print(f'{str(node)}, Высота: {level}, {str(node.get_side())}')
 
     # bfs(node_list[0], enter_node=enter_node)
 

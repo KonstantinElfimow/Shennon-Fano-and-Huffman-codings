@@ -151,11 +151,11 @@ def shannon_fano_algorithm(sorted_ensemble: dict) -> dict:
                 else:
                     left_node = BinaryTreeNode([(' '.join(keys[0:n])),
                                                 np.float64(format(summary, accurateness))])
-                    left_node.set_side(SIDE.LEFT)
+                    left_node.side = SIDE.LEFT
 
                     right_node = BinaryTreeNode([(' '.join(keys[n:len(keys)])),
                                                  np.float64(format(full_p - summary, accurateness))])
-                    right_node.set_side(SIDE.RIGHT)
+                    right_node.side = SIDE.RIGHT
 
                     node.children.append(left_node)
                     node.children.append(right_node)

@@ -1,7 +1,63 @@
 import numpy as np
 from enum import Enum
 
-accurateness: str = '.6g'
+""" Общая структура и функции """
+accurateness: str = '.6g'  # Точность до знака
+
+
+class SIDE(Enum):
+    LEFT = 0
+    RIGHT = 1
+
+    def __str__(self):
+        if self.value == 0:
+            return 'Лево'
+        else:
+            return 'Право'
+
+
+class BinaryTreeNode:
+    def __init__(self, data: list):
+        self.__visited = None
+        self.__side = None
+        self.key, self.value = data
+        self.children = []
+
+    def set_side(self, side):
+        self.__side = side
+
+    def get_side(self):
+        return self.__side
+
+    side = property(fget=get_side, fset=set_side)
+
+    def set_visited(self, value):
+        self.__visited = value
+
+    def get_visited(self):
+        return self.__visited
+
+    visited = property(fget=get_visited, fset=set_visited)
+
+    def __str__(self) -> str:
+        return '{}: {}'.format(self.key, self.value)
+
+
+def bfs(root, enter_node=None) -> None:
+    """ Обход в глубину в графе и запись кода """
+    root.visited = True
+    queue = [(root, 0)]
+    while len(queue) != 0:
+        target, level = queue.pop(0)
+
+        if enter_node is not None:
+            node, level = enter_node(target, level)  # Запись кода идёт здесь
+
+        for neighbour in target.children:
+            if neighbour.visited:
+                continue
+            neighbour.visited = True
+            queue.append((neighbour, level + 1))
 
 
 def sort_dict_by_value(ensemble: dict, reverse: bool) -> dict:
@@ -62,44 +118,66 @@ def redundancy(L: np.float64, H: np.float64) -> np.float64:
     return np.float64(format(K, accurateness))
 
 
-""" Код Шеннона-Фано"""
+""" Код Шеннона-Фано """
+
+code: dict = dict()
 
 
-_prefix_ensemble_shannon_fano: dict = dict()
-
-
-def _shannon_fano_algorithm(sorted_ensemble: dict, start: int, stop: int, p: np.float64 = 1.0, level: int = 0,
-                            bi: str = '') -> None:
-    global _prefix_ensemble_shannon_fano
-    print('Левая(0)/правая(1) ветка: ', bi, ' Глубина: ', level)
-
-    keys: list = [key for key in sorted_ensemble.keys()]
-    print(keys[start:stop], 'Вероятность: ', format(p, accurateness))
-
-    for i in range(start, stop):
-        _prefix_ensemble_shannon_fano[keys[i]] = _prefix_ensemble_shannon_fano.get(keys[i], '') + bi
-
-    if stop - start <= 1:
-        print(_prefix_ensemble_shannon_fano[keys[start]], '\n')
-        return
-
-    print()
-
-    summary: np.float64 = np.float64(0.0)
-    for i in range(start, stop, 1):
-        value = sorted_ensemble.get(keys[i])
-
-        if abs(p / 2 - summary) - abs(p / 2 - (summary + value)) > 0:
-            summary += value
-        else:
-            _shannon_fano_algorithm(sorted_ensemble, start, i, summary, level + 1, '0')
-            _shannon_fano_algorithm(sorted_ensemble, i, stop, np.float64(p - summary), level + 1, '1')
-            break
+def note_code(node):
+    """ Запись сверху-вниз """
+    bi: SIDE = node.get_side()  # LEFT|RIGHT
+    if bi is not None:
+        for key in node.key.split():
+            code[key] = code.get(key, '') + str(bi.value)
 
 
 def shannon_fano_algorithm(sorted_ensemble: dict) -> dict:
-    _shannon_fano_algorithm(sorted_ensemble, 0, len(sorted_ensemble))
-    return _prefix_ensemble_shannon_fano
+    """ Для построения префиксного кода был использован обход дерева в глубину.
+     Просто находим потомков узла и у его потомков ищем ещё потомков. """
+    global code
+    root = BinaryTreeNode([' '.join(sorted_ensemble.keys()), np.float64(1.0)])
+
+    def recursion(node, level=0) -> None:
+        full_p = node.value
+        keys = node.key.split()
+
+        if not node.visited and len(keys) != 1:
+            summary: np.float64 = np.float64(0.0)
+            for n, key in enumerate(keys):
+                p = sorted_ensemble[key]
+
+                if abs(full_p / 2 - summary) - abs(full_p / 2 - (summary + p)) > 0:
+                    summary += p
+                else:
+                    left_node = BinaryTreeNode([(' '.join(keys[0:n])),
+                                                np.float64(format(summary, accurateness))])
+                    left_node.set_side(SIDE.LEFT)
+
+                    right_node = BinaryTreeNode([(' '.join(keys[n:len(keys)])),
+                                                 np.float64(format(full_p - summary, accurateness))])
+                    right_node.set_side(SIDE.RIGHT)
+
+                    node.children.append(left_node)
+                    node.children.append(right_node)
+
+                    break
+        node.visited = True
+
+        def enter_node(node, level: int):
+            print(f'{str(node)}, Глубина: {level}, Сторона: {str(node.get_side())}')
+
+        # Запись кода идёт здесь
+        enter_node(node, level)
+        note_code(node)
+
+        for child in node.children:
+            if child.visited:
+                continue
+            recursion(child, level + 1)
+
+    recursion(root)
+
+    return code
 
 
 def shannon_fano_coding(ensemble: dict) -> dict:
@@ -127,91 +205,12 @@ def shannon_fano_coding(ensemble: dict) -> dict:
 """ Код Хаффмена """
 
 
-class SIDE(Enum):
-    def __str__(self):
-        return str(self.value)
-
-    LEFT = 'Левая часть'
-    RIGHT = 'Правая часть'
-
-
-class Node:
-    def __init__(self, data):
-        self.__visited = None
-        self.__side = None
-        self.key, self.value = data
-        self.neighbours = []
-
-    def set_side(self, side):
-        self.__side = side
-
-    def get_side(self):
-        return self.__side
-
-    side = property(fget=get_side, fset=set_side)
-
-    def set_visited(self, value):
-        self.__visited = value
-
-    def get_visited(self):
-        return self.__visited
-
-    visited = property(fget=get_visited, fset=set_visited)
-
-    def __str__(self):
-        return '{}: {}'.format(self.key, self.value)
-
-
-class ListenableGraphNode(Node):
-    def __init__(self, data=None):
-        super().__init__(data)
-
-    def set_side(self, value):
-        super().set_side(value)
-
-    def get_side(self):
-        return super().get_side()
-
-    side = property(fget=get_side, fset=set_side)
-
-    def set_visited(self, value):
-        super().set_visited(value)
-
-    def get_visited(self):
-        return super().get_visited()
-
-    visited = property(fget=get_visited, fset=set_visited)
-
-    def __str__(self):
-        return super().__str__()
-
-
-def bfs(root: Node, enter_node=None):
-    root.visited = True
-    queue = [(root, 0)]
-    while len(queue) != 0:
-        target, level = queue.pop(0)
-        safe_call(enter_node)(target, level)
-        for neighbour in target.neighbours:
-            if neighbour.visited:
-                continue
-            neighbour.visited = True
-            queue.append((neighbour, level + 1))
-
-
-def safe_call(function):
-    def wrapper(*args):
-        if function is not None:
-            function(*args)
-    return wrapper
-
-
-def huffman_algorythm(sorted_ensemble: dict):
+def huffman_algorythm(sorted_ensemble: dict) -> dict:
     code: dict = dict()
     for key in sorted_ensemble.keys():
         code[key] = ''
 
-    node_list: list = [ListenableGraphNode([ch, freq]) for (ch, freq) in sorted_ensemble.items()]
+    node_list: list = [BinaryTreeNode([ch, freq]) for (ch, freq) in sorted_ensemble.items()]
 
     while len(node_list) > 1:
         node_list = sorted(node_list, key=lambda x: x.value, reverse=True)
@@ -224,8 +223,8 @@ def huffman_algorythm(sorted_ensemble: dict):
             node_less = node_list[len(node_list) - 1 - count]
             node_bigger = node_list[reversed_i]
 
-            new_node = ListenableGraphNode([(node_bigger.key + ' ' + node_less.key),
-                                            float(format(node_bigger.value + node_less.value, accurateness))])
+            new_node = BinaryTreeNode([(node_bigger.key + ' ' + node_less.key),
+                                       float(format(node_bigger.value + node_less.value, accurateness))])
 
             keys1 = node_bigger.key.split()
             keys2 = node_less.key.split()
@@ -250,8 +249,8 @@ def huffman_algorythm(sorted_ensemble: dict):
                     print(code[key])
             print()
 
-            new_node.neighbours.append(node_bigger)
-            new_node.neighbours.append(node_less)
+            new_node.children.append(node_bigger)
+            new_node.children.append(node_less)
 
             node_list.pop(len(node_list) - 1 - count)
             node_list.pop(reversed_i)
@@ -260,9 +259,6 @@ def huffman_algorythm(sorted_ensemble: dict):
             break
         else:
             count += 1
-
-    def enter_node(node, level):
-        print(f'{str(node)}, Высота: {level}, {str(node.get_side())}')
 
     # bfs(node_list[0], enter_node=enter_node)
 

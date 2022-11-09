@@ -336,7 +336,7 @@ def main():
             file_output.write(f'{key}: {value}\n')
         file_output.close()
     else:
-        print('Неверный вход!')
+        raise ValueError('Неверный вход!')
 
 
 if __name__ == '__main__':

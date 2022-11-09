@@ -43,23 +43,6 @@ class BinaryTreeNode:
         return '{}: {}'.format(self.key, self.value)
 
 
-def bfs(root, enter_node=None) -> None:
-    """ Обход в глубину в графе и запись кода """
-    root.visited = True
-    queue = [(root, 0)]
-    while len(queue) != 0:
-        target, level = queue.pop(0)
-
-        if enter_node is not None:
-            node, level = enter_node(target, level)  # Запись кода идёт здесь
-
-        for neighbour in target.children:
-            if neighbour.visited:
-                continue
-            neighbour.visited = True
-            queue.append((neighbour, level + 1))
-
-
 def sort_dict_by_value(ensemble: dict, reverse: bool) -> dict:
     """ Сортировка ансамбля по убыванию """
     result: dict = dict()
@@ -120,10 +103,8 @@ def redundancy(L: np.float64, H: np.float64) -> np.float64:
 
 """ Код Шеннона-Фано """
 
-code: dict = dict()
 
-
-def note_code(node):
+def note_code(node: BinaryTreeNode, code: dict):
     """ Запись сверху-вниз """
     bi: SIDE = node.get_side()  # LEFT|RIGHT
     if bi is not None:
@@ -134,10 +115,10 @@ def note_code(node):
 def shannon_fano_algorithm(sorted_ensemble: dict) -> dict:
     """ Для построения префиксного кода был использован обход дерева в глубину.
      Просто находим потомков узла и у его потомков ищем ещё потомков. """
-    global code
+    code: dict = dict()
     root = BinaryTreeNode([' '.join(sorted_ensemble.keys()), np.float64(1.0)])
 
-    def recursion(node, level=0) -> None:
+    def recursion(node: BinaryTreeNode, level=0) -> None:
         full_p = node.value
         keys = node.key.split()
 
@@ -166,9 +147,9 @@ def shannon_fano_algorithm(sorted_ensemble: dict) -> dict:
         def enter_node(node, level: int):
             print(f'{str(node)}, Глубина: {level}, Сторона: {str(node.get_side())}')
 
-        # Запись кода идёт здесь
         enter_node(node, level)
-        note_code(node)
+        # Запись кода идёт здесь
+        note_code(node, code)
 
         for child in node.children:
             if child.visited:
@@ -203,6 +184,23 @@ def shannon_fano_coding(ensemble: dict) -> dict:
 
 
 """ Код Хаффмена """
+
+
+def bfs(root, enter_node=None) -> None:
+    """ Обход в глубину в графе и запись кода """
+    root.visited = True
+    queue = [(root, 0)]
+    while len(queue) != 0:
+        target, level = queue.pop(0)
+
+        if enter_node is not None:
+            node, level = enter_node(target, level)
+
+        for neighbour in target.children:
+            if neighbour.visited:
+                continue
+            neighbour.visited = True
+            queue.append((neighbour, level + 1))
 
 
 def huffman_algorythm(sorted_ensemble: dict) -> dict:
@@ -277,12 +275,12 @@ def huffman_coding(ensemble: dict) -> dict:
 
     l_prefix: list = [value for value in result.values()]
     p_l: list = [p for p in sorted_ensemble.values()]
+    print('L = ')
     L: np.float64 = average_length(l_prefix, p_l)
-    print('L = ', L, ' (бит)')
+    print('H = ')
     H: np.float64 = entropy(p_l)
-    print('H = ', H, ' (бит)')
+    print('K =')
     K: np.float64 = redundancy(L, H)
-    print('K = L - H = ', K, ' (бит/символ)')
 
     return result
 

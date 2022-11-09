@@ -66,8 +66,11 @@ def average_length(l_length: list, l_p: list) -> np.float64:
         s2 += format(len(l_length[i]) * l_p[i], accurateness) + ' + '
 
     L = np.float64(format(L, accurateness))
+
+    print('L = ')
     print(s1, ' =\n', s2, ' = ', L, ' (бит)')
     print()
+
     return L
 
 
@@ -87,6 +90,7 @@ def entropy(l_p: list) -> np.float64:
 
     H = np.float64(format(-H, accurateness))
 
+    print('H = ')
     print(s1, ' =\n', s2, ' = ', H, ' (бит)')
     print()
 
@@ -96,8 +100,11 @@ def entropy(l_p: list) -> np.float64:
 def redundancy(L: np.float64, H: np.float64) -> np.float64:
     """ Избыточность """
     K: np.float64 = np.float64(format(L - H, accurateness))
+
+    print('K =')
     print(f'{L} - {H} = ', K, ' (бит/символ)')
     print()
+
     return np.float64(format(K, accurateness))
 
 
@@ -173,11 +180,9 @@ def shannon_fano_coding(ensemble: dict) -> dict:
 
     l_prefix: list = [value for value in result.values()]
     p_l: list = [p for p in sorted_ensemble.values()]
-    print('L = ')
+
     L: np.float64 = average_length(l_prefix, p_l)
-    print('H = ')
     H: np.float64 = entropy(p_l)
-    print('K =')
     K: np.float64 = redundancy(L, H)
 
     return result
@@ -275,11 +280,9 @@ def huffman_coding(ensemble: dict) -> dict:
 
     l_prefix: list = [value for value in result.values()]
     p_l: list = [p for p in sorted_ensemble.values()]
-    print('L = ')
+
     L: np.float64 = average_length(l_prefix, p_l)
-    print('H = ')
     H: np.float64 = entropy(p_l)
-    print('K =')
     K: np.float64 = redundancy(L, H)
 
     return result

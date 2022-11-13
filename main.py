@@ -17,10 +17,10 @@ class SIDE(Enum):
 
 
 class BinaryTreeNode:
-    def __init__(self, data: list):
+    def __init__(self, *, key: int | str, value: int | float):
         self.__visited = None
         self.__side = None
-        self.key, self.value = data
+        self.key, self.value = key, value
         self.children = []
 
     def set_side(self, side):
@@ -43,19 +43,19 @@ class BinaryTreeNode:
         return '{}: {}'.format(self.key, self.value)
 
 
-def sort_dict_by_value(ensemble: dict, reverse: bool) -> dict:
-    """ Сортировка ансамбля по убыванию """
+def sort_dict_by_value(*, dic: dict, reverse: bool) -> dict:
+    """ Сортировка ансамбля по ключу """
     result: dict = dict()
 
-    sorted_keys = sorted(ensemble, key=ensemble.get, reverse=reverse)
+    sorted_keys = sorted(dic, key=dic.get, reverse=reverse)
     for w in sorted_keys:
-        result[w] = ensemble[w]
+        result[w] = dic[w]
     return result
 
 
-def average_length(l_length: list, l_p: list) -> np.float64:
+def average_length(l_length: list, l_p: list) -> float:
     """ Средняя длина """
-    L: np.float64 = np.float64(0.0)
+    L: float = 0.0
 
     s1: str = ''
     s2: str = ''
@@ -65,7 +65,7 @@ def average_length(l_length: list, l_p: list) -> np.float64:
         s1 += f'{len(l_length[i])} * {l_p[i]} + '
         s2 += format(len(l_length[i]) * l_p[i], accurateness) + ' + '
 
-    L = np.float64(format(L, accurateness))
+    L = float(format(L, accurateness))
 
     print('L = ')
     print(s1, ' =\n', s2, ' = ', L, ' (бит)')
@@ -74,21 +74,21 @@ def average_length(l_length: list, l_p: list) -> np.float64:
     return L
 
 
-def entropy(l_p: list) -> np.float64:
+def entropy(l_p: list) -> float:
     """ Энтропия """
-    H: np.float64 = np.float64(0.0)
+    H: float = 0.0
 
     s1: str = ''
     s2: str = ''
     for value in l_p:
-        value = np.float64(value)
+        value = float(value)
 
         H += value * np.log2(value)
 
         s1 += f' - {value} * log2({value})'
         s2 += format(-value * np.log2(value), accurateness) + ' + '
 
-    H = np.float64(format(-H, accurateness))
+    H = float(format(-H, accurateness))
 
     print('H = ')
     print(s1, ' =\n', s2, ' = ', H, ' (бит)')
@@ -97,15 +97,15 @@ def entropy(l_p: list) -> np.float64:
     return H
 
 
-def redundancy(L: np.float64, H: np.float64) -> np.float64:
+def redundancy(L: float, H: float) -> float:
     """ Избыточность """
-    K: np.float64 = np.float64(format(L - H, accurateness))
+    K: float = float(format(L - H, accurateness))
 
     print('K =')
     print(f'{L} - {H} = ', K, ' (бит/символ)')
     print()
 
-    return np.float64(format(K, accurateness))
+    return float(format(K, accurateness))
 
 
 """ Код Шеннона-Фано """
@@ -123,26 +123,26 @@ def shannon_fano_algorithm(sorted_ensemble: dict) -> dict:
     """ Для построения префиксного кода был использован обход дерева в глубину.
      Просто находим потомков узла и у его потомков ищем ещё потомков. """
     code: dict = dict()
-    root = BinaryTreeNode([' '.join(sorted_ensemble.keys()), np.float64(1.0)])
+    root = BinaryTreeNode(key=' '.join(sorted_ensemble.keys()), value=1.0)
 
     def recursion(node: BinaryTreeNode, level=0) -> None:
         full_p = node.value
         keys = node.key.split()
 
         if not node.visited and len(keys) != 1:
-            summary: np.float64 = np.float64(0.0)
+            summary: float = 0.0
             for n, key in enumerate(keys):
                 p = sorted_ensemble[key]
 
                 if abs(full_p / 2 - summary) - abs(full_p / 2 - (summary + p)) > 0:
                     summary += p
                 else:
-                    left_node = BinaryTreeNode([(' '.join(keys[0:n])),
-                                                np.float64(format(summary, accurateness))])
+                    left_node = BinaryTreeNode(key=(' '.join(keys[0:n])),
+                                               value=float(format(summary, accurateness)))
                     left_node.side = SIDE.LEFT
 
-                    right_node = BinaryTreeNode([(' '.join(keys[n:len(keys)])),
-                                                 np.float64(format(full_p - summary, accurateness))])
+                    right_node = BinaryTreeNode(key=(' '.join(keys[n:len(keys)])),
+                                                value=float(format(full_p - summary, accurateness)))
                     right_node.side = SIDE.RIGHT
 
                     node.children.append(left_node)
@@ -151,7 +151,7 @@ def shannon_fano_algorithm(sorted_ensemble: dict) -> dict:
                     break
         node.visited = True
 
-        def enter_node(node, level: int):
+        def enter_node(node: BinaryTreeNode, level: int):
             print(f'{str(node)}, Глубина: {level}, Сторона: {str(node.get_side())}')
 
         enter_node(node, level)
@@ -168,22 +168,20 @@ def shannon_fano_algorithm(sorted_ensemble: dict) -> dict:
     return code
 
 
-def shannon_fano_coding(ensemble: dict) -> dict:
-    print('Неотсортированный: \n', ensemble)
-
-    sorted_ensemble: dict = sort_dict_by_value(ensemble, True)
+def shannon_fano_coding(*, input_ensemble: dict) -> dict:
+    print('Неотсортированный: \n', input_ensemble)
+    sorted_ensemble: dict = sort_dict_by_value(dic=input_ensemble, reverse=True)
     print('Отсортированный: \n', sorted_ensemble)
     print()
-
     result: dict = shannon_fano_algorithm(sorted_ensemble)
     print(result)
 
     l_prefix: list = [value for value in result.values()]
     p_l: list = [p for p in sorted_ensemble.values()]
 
-    L: np.float64 = average_length(l_prefix, p_l)
-    H: np.float64 = entropy(p_l)
-    K: np.float64 = redundancy(L, H)
+    L: float = average_length(l_prefix, p_l)
+    H: float = entropy(p_l)
+    K: float = redundancy(L, H)
 
     return result
 
@@ -191,7 +189,7 @@ def shannon_fano_coding(ensemble: dict) -> dict:
 """ Код Хаффмена """
 
 
-def bfs(root, enter_node=None) -> None:
+def bfs(root: BinaryTreeNode, enter_node=None) -> None:
     """ Обход в глубину в графе и запись кода """
     root.visited = True
     queue = [(root, 0)]
@@ -201,11 +199,11 @@ def bfs(root, enter_node=None) -> None:
         if enter_node is not None:
             node, level = enter_node(target, level)
 
-        for neighbour in target.children:
-            if neighbour.visited:
+        for child in target.children:
+            if child.visited:
                 continue
-            neighbour.visited = True
-            queue.append((neighbour, level + 1))
+            child.visited = True
+            queue.append((child, level + 1))
 
 
 def huffman_algorythm(sorted_ensemble: dict) -> dict:
@@ -213,7 +211,7 @@ def huffman_algorythm(sorted_ensemble: dict) -> dict:
     for key in sorted_ensemble.keys():
         code[key] = ''
 
-    node_list: list = [BinaryTreeNode([ch, freq]) for (ch, freq) in sorted_ensemble.items()]
+    node_list: list = [BinaryTreeNode(key=ch, value=freq) for (ch, freq) in sorted_ensemble.items()]
 
     while len(node_list) > 1:
         node_list = sorted(node_list, key=lambda x: x.value, reverse=True)
@@ -226,8 +224,8 @@ def huffman_algorythm(sorted_ensemble: dict) -> dict:
             node_less = node_list[len(node_list) - 1 - count]
             node_bigger = node_list[reversed_i]
 
-            new_node = BinaryTreeNode([(node_bigger.key + ' ' + node_less.key),
-                                       float(format(node_bigger.value + node_less.value, accurateness))])
+            new_node = BinaryTreeNode(key=(node_bigger.key + ' ' + node_less.key),
+                                      value=float(format(node_bigger.value + node_less.value, accurateness)))
 
             keys1 = node_bigger.key.split()
             keys2 = node_less.key.split()
@@ -270,9 +268,9 @@ def huffman_algorythm(sorted_ensemble: dict) -> dict:
     return code
 
 
-def huffman_coding(ensemble: dict) -> dict:
-    print('Неотсортированный: \n', ensemble)
-    sorted_ensemble: dict = sort_dict_by_value(ensemble, True)
+def huffman_coding(*, input_ensemble: dict) -> dict:
+    print('Неотсортированный: \n', input_ensemble)
+    sorted_ensemble: dict = sort_dict_by_value(dic=input_ensemble, reverse=True)
     print('Отсортированный: \n', sorted_ensemble)
     print()
     result: dict = huffman_algorythm(sorted_ensemble)
@@ -281,9 +279,9 @@ def huffman_coding(ensemble: dict) -> dict:
     l_prefix: list = [value for value in result.values()]
     p_l: list = [p for p in sorted_ensemble.values()]
 
-    L: np.float64 = average_length(l_prefix, p_l)
-    H: np.float64 = entropy(p_l)
-    K: np.float64 = redundancy(L, H)
+    L: float = average_length(l_prefix, p_l)
+    H: float = entropy(p_l)
+    K: float = redundancy(L, H)
 
     return result
 
@@ -291,10 +289,11 @@ def huffman_coding(ensemble: dict) -> dict:
 """ Вход-выход """
 
 
-def test_valid(ensemble: dict) -> bool:
-    summary: np.float64 = np.float64(0.0)
-    for value in ensemble.values():
-        summary += np.float64(value)
+def test_valid(*, input_ensemble: dict) -> bool:
+    summary: float = 0.0
+    for value in input_ensemble.values():
+        summary += float(value)
+    summary = float(format(summary, accurateness))    
     return abs(1.0 - summary) < 1e-10
 
 
@@ -316,16 +315,16 @@ def main():
         for word in line:
             word.replace(' ', '')
         key, value = line
-        ensemble[key] = np.float64(value)
+        ensemble[key] = float(value)
 
     # Сумма вероятностей должна быть равна 1.0
-    if test_valid(ensemble):
+    if test_valid(input_ensemble=ensemble):
         num = int(input('>> Шеннон-Фано: 0; Хаффмен: 1 - '))
         prefix_dict: dict = dict()
         if num == 0:
-            prefix_dict = shannon_fano_coding(ensemble)
+            prefix_dict = shannon_fano_coding(input_ensemble=ensemble)
         elif num == 1:
-            prefix_dict = huffman_coding(ensemble)
+            prefix_dict = huffman_coding(input_ensemble=ensemble)
 
         # Записываем результат (например,
         # z1: 001

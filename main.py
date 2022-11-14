@@ -1,6 +1,6 @@
-import operator
-import numpy as np
 from enum import Enum
+import numpy as np
+
 
 """ Общая структура и функции """
 accurateness: str = '.6g'  # Точность до знака
@@ -46,7 +46,7 @@ class BinaryTreeNode:
 
 def sort_dict_by_value(*, dic: dict, reverse: bool) -> dict:
     """ Сортировка ансамбля по ключу """
-    result = dict(sorted(dic.items(), key=operator.itemgetter(1), reverse=reverse))
+    result = dict(sorted(dic.items(), key=lambda key_value: key_value[1], reverse=reverse))
     return result
 
 

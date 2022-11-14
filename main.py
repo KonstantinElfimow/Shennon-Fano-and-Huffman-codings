@@ -1,3 +1,4 @@
+import operator
 import numpy as np
 from enum import Enum
 
@@ -45,11 +46,7 @@ class BinaryTreeNode:
 
 def sort_dict_by_value(*, dic: dict, reverse: bool) -> dict:
     """ Сортировка ансамбля по ключу """
-    result: dict = dict()
-
-    sorted_keys = sorted(dic, key=dic.get, reverse=reverse)
-    for w in sorted_keys:
-        result[w] = dic[w]
+    result = dict(sorted(dic.items(), key=operator.itemgetter(1), reverse=reverse))
     return result
 
 

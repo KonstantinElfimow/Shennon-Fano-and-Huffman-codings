@@ -57,7 +57,7 @@ def main():
             file_output.write('\n'.join(['\t'.join([x for x in row]) for row in result_table]))
             file_output.close()
         else:
-            raise ValueError
+            raise ValueError()
     else:
         raise ValueError('Неверный вход!')
 

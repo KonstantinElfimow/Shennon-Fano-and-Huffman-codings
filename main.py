@@ -54,7 +54,7 @@ def main():
             result_table: tuple = gilbert_mur_coding(input_ensemble=ensemble)
             # Записываем результат
             file_output = open(f'./output/output_{suffix}.txt', 'w')
-            file_output.write('\n'.join(['    '.join([x for x in row]) for row in result_table]))
+            file_output.write('\n'.join(['\t'.join([x for x in row]) for row in result_table]))
             file_output.close()
         else:
             raise ValueError

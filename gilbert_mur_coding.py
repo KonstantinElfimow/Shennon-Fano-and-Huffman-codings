@@ -38,7 +38,7 @@ def _gilbert_mur_algorithm(ensemble: dict) -> (dict, tuple):
         prefix[alpha] = code_word
 
     table: list = list()
-    table.append(tuple(['Xm', 'pm', 'qm', 'sigma m', 'length l', 'code']))
+    table.append(tuple(['Xm', 'pm', 'qm', 'sigma', 'l', 'code']))
     for i, (alpha, word) in enumerate(prefix.items()):
         table.append(tuple([alpha, str(ensemble[alpha]), str(q[i]), str(sigma[i]), str(l[i]), word]))
     return prefix, tuple(table)

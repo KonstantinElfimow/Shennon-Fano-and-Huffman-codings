@@ -46,6 +46,7 @@ def _gilbert_mur_algorithm(ensemble: dict) -> (dict, tuple):
 
 def gilbert_mur_coding(*, input_ensemble: dict) -> tuple:
     print(input_ensemble)
+    print()
     prefix, result_table = _gilbert_mur_algorithm(input_ensemble)
     print(prefix)
     print()

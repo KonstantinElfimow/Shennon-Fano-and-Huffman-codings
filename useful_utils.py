@@ -2,7 +2,6 @@
 from enum import Enum
 import numpy as np
 
-
 accurateness: int = 6  # Округдение до знака
 
 
@@ -82,3 +81,7 @@ def redundancy(L: float, H: float) -> float:
     print()
 
     return K
+
+
+def сramers_inequality(length: list) -> bool:
+    return sum([(2 ** -l) for l in length]) <= 1

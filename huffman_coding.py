@@ -94,6 +94,8 @@ def huffman_coding(*, input_ensemble: dict) -> dict:
     print()
 
     prefix_length: list = [len(value) for value in result.values()]
+    if not сramers_inequality(prefix_length):
+        raise ValueError('Кодовую информацию нельзя однозначно декодировать')
     p: list = [p for p in sorted_ensemble.values()]
     prefix_length_and_p = [tuple(x) for x in zip(prefix_length, p)]
 

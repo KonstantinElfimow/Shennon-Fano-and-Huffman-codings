@@ -1,7 +1,7 @@
 """ Код Гилберта-Мура """
 import numpy as np
 import math
-from useful_utils import average_length, entropy, redundancy
+from useful_utils import average_length, entropy, redundancy, сramers_inequality
 
 
 accurateness: int = 6  # Округдение до знака
@@ -51,6 +51,8 @@ def gilbert_mur_coding(*, input_ensemble: dict) -> tuple:
     print()
 
     prefix_length: list = [len(value) for value in prefix.values()]
+    if not сramers_inequality(prefix_length):
+        raise ValueError('Кодовую информацию нельзя однозначно декодировать')
     p: list = [p for p in input_ensemble.values()]
     prefix_length_and_p = [tuple(x) for x in zip(prefix_length, p)]
 

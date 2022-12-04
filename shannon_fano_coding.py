@@ -2,6 +2,9 @@
 from useful_utils import *
 
 
+accurateness: int = 6  # Округдение до знака
+
+
 def _note_code(node: BinaryTreeNode, code: dict):
     """ Запись сверху-вниз """
     bi: SIDE = node.get_side()  # LEFT|RIGHT
@@ -29,11 +32,11 @@ def _shannon_fano_algorithm(sorted_ensemble: dict) -> dict:
                     summary += p
                 else:
                     left_node = BinaryTreeNode(key=(' '.join(keys[0:n])),
-                                               value=round(summary, 6))
+                                               value=round(summary, accurateness))
                     left_node.side = SIDE.LEFT
 
                     right_node = BinaryTreeNode(key=(' '.join(keys[n:len(keys)])),
-                                                value=round(full_p - summary, 6))
+                                                value=round(full_p - summary, accurateness))
                     right_node.side = SIDE.RIGHT
 
                     node.children.append(left_node)

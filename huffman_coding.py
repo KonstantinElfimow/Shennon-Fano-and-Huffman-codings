@@ -2,6 +2,9 @@
 from useful_utils import *
 
 
+accurateness: int = 6  # Округдение до знака
+
+
 def _bfs(root: BinaryTreeNode, enter_node=None) -> None:
     """ Обход в глубину в графе и запись кода """
     root.visited = True
@@ -38,7 +41,7 @@ def _huffman_algorythm(sorted_ensemble: dict) -> dict:
             node_bigger = node_list[reversed_i]
 
             new_node = BinaryTreeNode(key=(node_bigger.key + ' ' + node_less.key),
-                                      value=round(node_bigger.value + node_less.value, 6))
+                                      value=round(node_bigger.value + node_less.value, accurateness))
 
             keys1 = node_bigger.key.split()
             keys2 = node_less.key.split()

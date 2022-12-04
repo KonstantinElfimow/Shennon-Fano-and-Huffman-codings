@@ -83,5 +83,5 @@ def redundancy(L: float, H: float) -> float:
     return K
 
 
-def сramers_inequality(length: list) -> bool:
+def kraft_inequality(length: list) -> bool:
     return sum([(2 ** -l) for l in length]) <= 1

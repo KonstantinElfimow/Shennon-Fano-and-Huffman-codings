@@ -7,7 +7,7 @@ from useful_utils import average_length, entropy, redundancy, kraft_inequality
 accurateness: int = 6  # Округдение до знака
 
 
-def _gilbert_mur_algorithm(ensemble: dict) -> (dict, tuple):
+def _gilbert_mur_algorithm(ensemble: dict) -> (dict, list):
     q: list = [0.0]
     sigma: list = list()
     for i, p in enumerate(ensemble.values()):
@@ -22,9 +22,11 @@ def _gilbert_mur_algorithm(ensemble: dict) -> (dict, tuple):
         length: float = 0.5
         step: float = 0.5
         print('Рассмотрим {}: {}. sigma = {}'.format(alpha, p, sigma[i]))
-        current_i: int = 0
+        count: int = 0
+        print('итерация = {}, начальная длина отрезка = {}'.format(count, length))
         while 2 * step > p / 2:
             step /= 2
+            count += 1
             if sigma[i] < length:
                 code_word += '0'
                 length -= step
@@ -32,19 +34,20 @@ def _gilbert_mur_algorithm(ensemble: dict) -> (dict, tuple):
                 code_word += '1'
                 length += step
             length = round(length, accurateness)
-            current_i += 1
-            print('итерация = {}, длина отрезка = {}, шаг = {}, кодовое слово = {}'.format(current_i, length, step, code_word))
+            print('итерация = {}, длина отрезка = {}, этот шаг = {}, кодовое слово = {}'.format(count, length,
+                                                                                                     step, code_word))
+
         print()
         prefix[alpha] = code_word
 
     table: list = list()
-    table.append(tuple(['Xm', 'pm\t', 'qm\t', 'sigma', 'l', 'code']))
+    table.append(tuple(['Xm', 'pm', 'qm', 'sigma', 'l', 'code']))
     for i, (alpha, word) in enumerate(prefix.items()):
-        table.append(tuple([alpha, str(ensemble[alpha]), str(q[i]), str(sigma[i]), str(l[i]), word]))
+        table.append(tuple([alpha, ensemble[alpha], q[i], sigma[i], l[i], word]))
     return prefix, tuple(table)
 
 
-def gilbert_mur_coding(*, input_ensemble: dict) -> tuple:
+def gilbert_mur_coding(*, input_ensemble: dict) -> (tuple, float, float, float):
     print(input_ensemble)
     print()
     prefix, result_table = _gilbert_mur_algorithm(input_ensemble)
@@ -61,4 +64,4 @@ def gilbert_mur_coding(*, input_ensemble: dict) -> tuple:
     H: float = entropy(p)
     K: float = redundancy(L, H)
 
-    return result_table
+    return result_table, L, H, K

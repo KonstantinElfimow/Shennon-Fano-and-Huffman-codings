@@ -5,12 +5,11 @@ from shannon_fano_coding import shannon_fano_coding
 from huffman_coding import huffman_coding
 from gilbert_mur_coding import gilbert_mur_coding
 
-
 accurateness: int = 6  # Округдение до знака
 
 
 def test_valid(*, input_ensemble: dict) -> bool:
-    summary: float = round(reduce(lambda x, y: x + y, input_ensemble.values()), accurateness)
+    summary: float = reduce(lambda x, y: round(x + y, accurateness), input_ensemble.values())
     return abs(1.0 - summary) < 1e-10
 
 
@@ -51,10 +50,14 @@ def main():
             file_output.write('\n'.join('{}: {}'.format(k, v) for k, v in prefix_dict.items()))
             file_output.close()
         elif num == 2:
-            result_table: tuple = gilbert_mur_coding(input_ensemble=ensemble)
+            result_table, L, H, K = gilbert_mur_coding(input_ensemble=ensemble)
             # Записываем результат
             file_output = open(f'./output/output_{suffix}.txt', 'w')
-            file_output.write('\n'.join(['\t'.join([x for x in row]) for row in result_table]))
+            file_output.write('\n'.join([' '.join([str(x).ljust(10) for x in row]) for row in result_table]))
+            file_output.write('\n\n')
+            file_output.write(f'L = {L} (bit)\n')
+            file_output.write(f'H = {H} (bit)\n')
+            file_output.write(f'K = {K} (bit/symbol)')
             file_output.close()
         else:
             raise ValueError('Неверно введённый num!')

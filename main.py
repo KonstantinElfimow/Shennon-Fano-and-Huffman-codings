@@ -1,13 +1,11 @@
 """ Вход-выход """
+from functools import reduce
 from shannon_fano_coding import shannon_fano_coding
 from huffman_coding import huffman_coding
 
 
 def test_valid(*, input_ensemble: dict) -> bool:
-    summary: float = 0.0
-    for value in input_ensemble.values():
-        summary += value
-    summary = round(summary, 6)
+    summary: float = round(reduce(lambda x, y: x + y, input_ensemble.values()), 6)
     return abs(1.0 - summary) < 1e-10
 
 

@@ -3,12 +3,11 @@ import numpy as np
 import math
 from useful_utils import average_length, entropy, redundancy, kraft_inequality
 
-
 accurateness: int = 6  # Округдение до знака
 
 
 def _gilbert_mur_algorithm(ensemble: dict) -> (dict, list):
-    q: list = [0.0]
+    q: list = [0]
     sigma: list = list()
     for i, p in enumerate(ensemble.values()):
         q.append(round(q[i] + p, accurateness))
@@ -35,7 +34,7 @@ def _gilbert_mur_algorithm(ensemble: dict) -> (dict, list):
                 length += step
             length = round(length, accurateness)
             print('итерация = {}, длина отрезка = {}, этот шаг = {}, кодовое слово = {}'.format(count, length,
-                                                                                                     step, code_word))
+                                                                                                step, code_word))
 
         print()
         prefix[alpha] = code_word

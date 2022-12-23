@@ -1,4 +1,5 @@
 """ Код Шеннона-Фано """
+from tree_node import *
 from useful_utils import *
 
 

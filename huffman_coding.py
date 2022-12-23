@@ -1,4 +1,5 @@
 """ Код Хаффмена """
+from tree_node import *
 from useful_utils import *
 
 

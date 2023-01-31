@@ -43,6 +43,8 @@ def _shannon_fano_algorithm(sorted_ensemble: dict) -> dict:
                     node.children.append(left_node)
                     node.children.append(right_node)
 
+                    left_node.parents.append(node)
+                    right_node.parents.append(node)
                     break
         node.visited = True
 

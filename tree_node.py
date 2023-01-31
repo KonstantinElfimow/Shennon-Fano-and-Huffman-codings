@@ -17,7 +17,8 @@ class BinaryTreeNode:
         self.__visited = None
         self.__side = None
         self.key, self.value = key, value
-        self.children = []
+        self.children: list = []
+        self.parents: list = []
 
     def set_side(self, side):
         self.__side = side
